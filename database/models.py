@@ -1,6 +1,6 @@
 import uuid as uuid
 
-from sqlalchemy import Column, Integer, String, ForeignKey, false, JSON, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, false, JSON, Boolean, UniqueConstraint
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import declarative_base, relationship
 
@@ -49,8 +49,11 @@ class Question(Model):
     title: str = Column(String, nullable=False)
     description: str = Column(String, nullable=False)
     required: bool = Column(Boolean, nullable=False, default=True)
-
     form_type_id: int = Column(Integer, ForeignKey("form_type.id"), nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint('title', 'form_type_id', name='idx_title_form_type'),
+    )
 
 
 class Answer(Model):
@@ -60,3 +63,8 @@ class Answer(Model):
     form_id: int = Column(Integer, ForeignKey(Form.id), nullable=False)
     form = relationship(Form, back_populates="answers", lazy="selectin")
     answer_object = Column(JSON, default=None)
+
+    __table_args__ = (
+        UniqueConstraint('form_id', 'form_question_id', name='idx_answer_form_question'),
+    )
+
